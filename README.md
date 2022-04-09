@@ -1,6 +1,8 @@
-# Config
+# Donfig
 
 Deno module that lets you set some default parameters and then change them for different deployment scenarios.
+
+Configurations are stored in files within your application, and can be overridden and extended by environment variables or external sources.
 
 ## Features
 
