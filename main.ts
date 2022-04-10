@@ -9,6 +9,7 @@ import type {
 } from "./types.ts";
 
 const getValue = ({
+  type,
   env,
   default: defaultValue,
   nullable,
@@ -32,6 +33,22 @@ const getValue = ({
   if (value === null) {
     if (nullable) {
       return null;
+    }
+  }
+
+  if (value !== null && value !== undefined) {
+    if (type === Number) {
+      return Number(value);
+    }
+
+    if (type === Boolean) {
+      return Boolean(value);
+    }
+    if (type === Date) {
+      return new Date(value as string);
+    }
+    if (type === Array && typeof value === "string") {
+      return (value as string).split(",");
     }
   }
 
@@ -93,7 +110,7 @@ export default <T = ConfigSchema>(schema: T) => {
           typedFunction = typed.string;
           break;
         case Number:
-          typedFunction = typed.asNumber;
+          typedFunction = typed.number;
           break;
 
         case Boolean:
