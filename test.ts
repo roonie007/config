@@ -1,6 +1,7 @@
 import {
   assertEquals,
   assertThrows,
+  assertArrayIncludes,
 } from "https://deno.land/std@0.134.0/testing/asserts.ts";
 import donfig from "./mod.ts";
 
@@ -119,4 +120,60 @@ Deno.test("Should validate a nested config", () => {
   myConfig.validate();
 
   assertEquals(myConfig.getConfig().this.is.a.nested.value, undefined);
+});
+
+Deno.test(
+  "Should validate the config with env variable with type number",
+  () => {
+    Deno.env.set("TEST_NUMBER", "8080");
+
+    const myConfig = donfig({
+      port: {
+        type: Number,
+        env: "TEST_NUMBER",
+      },
+    });
+    myConfig.validate();
+    const config = myConfig.getConfig();
+
+    assertEquals(config.port, 8080);
+    Deno.env.delete("TEST_NUMBER");
+  }
+);
+
+Deno.test(
+  "Should validate the config with env variable with type array",
+  () => {
+    Deno.env.set("TEST_ARRAY", "0,1,10,100");
+
+    const myConfig = donfig({
+      array: {
+        type: Array,
+        env: "TEST_ARRAY",
+      },
+    });
+    myConfig.validate();
+    const config = myConfig.getConfig();
+
+    assertArrayIncludes(config.array, ["0", "1", "10", "100"]);
+    Deno.env.delete("TEST_ARRAY");
+  }
+);
+
+Deno.test("Should validate the config with env variable with type Date", () => {
+  Deno.env.set("TEST_DATE", "05 October 2011 14:48 UTC");
+
+  const myConfig = donfig({
+    date: {
+      type: Date,
+      env: "TEST_DATE",
+    },
+  });
+  myConfig.validate();
+  const config = myConfig.getConfig();
+
+  assertEquals(config.date.getFullYear(), 2011);
+  assertEquals(config.date.getMonth(), 9);
+  assertEquals(config.date.getDate(), 5);
+  Deno.env.delete("TEST_DATE");
 });
