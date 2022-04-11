@@ -103,7 +103,7 @@ export default <T = ConfigSchema>(schema: T) => {
     fn: (object, path) => {
       let toAccessObject: Record<string, unknown> = valueObject;
       let toAccessSchemaData = validationSchemaData;
-      let typedFunction: TypedFunction;
+      let typedFunction: TypedFunction = typed.string;
 
       switch (object.type) {
         case String:
@@ -126,8 +126,10 @@ export default <T = ConfigSchema>(schema: T) => {
           break;
       }
 
-      path.split(".").forEach((key) => {
-        if (path.endsWith(key)) {
+      const keys = path.split(".");
+
+      for (const [i, key] of keys.entries()) {
+        if (i === keys.length - 1) {
           toAccessObject[key] = getValue(object);
 
           // Schema data
@@ -156,7 +158,7 @@ export default <T = ConfigSchema>(schema: T) => {
             unknown
           >;
         }
-      });
+      }
     },
   });
 

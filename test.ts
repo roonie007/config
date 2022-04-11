@@ -177,3 +177,35 @@ Deno.test("Should validate the config with env variable with type Date", () => {
   assertEquals(config.date.getDate(), 5);
   Deno.env.delete("TEST_DATE");
 });
+
+Deno.test(
+  "Should validate the config even if the parent and nested keys have the same name",
+  () => {
+    Deno.env.set("TEST_DATE", "05 October 2011 14:48 UTC");
+
+    const myConfig = donfig({
+      test1: {
+        test1: {
+          type: String,
+          default: "test1",
+        },
+        test2: {
+          test1: {
+            type: String,
+            default: "nested-test1",
+          },
+          test2: {
+            type: String,
+            default: "nested-test2",
+          },
+        },
+      },
+    });
+    myConfig.validate();
+    const config = myConfig.getConfig();
+
+    assertEquals(config.test1.test1, "test1");
+    assertEquals(config.test1.test2.test1, "nested-test1");
+    assertEquals(config.test1.test2.test2, "nested-test2");
+  }
+);
