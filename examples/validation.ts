@@ -1,9 +1,9 @@
-import donfig from "../mod.ts";
+import donfig from '../mod.ts';
 
 const config = donfig({
   hey: {
     type: String,
-    default: "hey",
+    default: 'hey',
     nullable: true,
   },
   api: {
@@ -12,7 +12,7 @@ const config = donfig({
     },
     port: {
       type: Number,
-      env: "API_PORT",
+      env: 'API_PORT',
       default: 8080,
     },
   },
@@ -47,11 +47,11 @@ try {
   console.error(err);
 }
 
-config.override({ api: { host: "localhost" } });
+config.override({ api: { host: 'localhost' } });
 
 try {
   config.validate(); // Config is valid
-  console.log("\n\nConfig is valid");
+  console.log('\n\nConfig is valid');
 } catch (err) {
   console.error(err);
 }

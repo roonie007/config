@@ -15,13 +15,13 @@ Configurations are stored in files within your application, and can be overridde
 ## Usage
 
 ```typescript
-import donfig from "https://deno.land/x/donfig/mod.ts";
+import donfig from 'https://deno.land/x/donfig/mod.ts';
 
 const config = donfig({
   api: {
     host: {
       type: String,
-      default: "localhost",
+      default: 'localhost',
     },
     port: {
       type: Number,
@@ -43,13 +43,13 @@ const config = donfig({
 });
 
 // Perform validation
-config.validate({ allowed: "strict" });
+config.validate({ allowed: 'strict' });
 
 export default config.getConfig();
-/** Should return 
+/** Should return
 {
   api: {
-    host: "localhost", 
+    host: "localhost",
     port: 8080
   },
    this: {
@@ -67,7 +67,8 @@ export default config.getConfig();
 
 ### Override
 
-You will certainly have different configuration for testing, development and production, you will need to override your config values in dependence of your environnement.
+You will certainly have different configuration for testing, development and production, you will need to override your config values in dependence of your
+environnement.
 
 ```typescript
 // ./configs/test.json
@@ -121,8 +122,6 @@ if(env === 'test') {
   console.log(config.getConfig().api.host); // should be my-domain.com
   console.log(config.getConfig().api.port); // should be undefined (check optional value bellow)
 }
-
-
 ```
 
 ### Use an environnement variable
@@ -130,17 +129,17 @@ if(env === 'test') {
 Let's pretend that you have an environnement variable named `API_PORT` with a value `3000`
 
 ```typescript
-import donfig from "https://deno.land/x/donfig/mod.ts";
+import donfig from 'https://deno.land/x/donfig/mod.ts';
 
 const config = donfig({
   api: {
     host: {
       type: String,
-      default: "localhost",
+      default: 'localhost',
     },
     port: {
       type: Number,
-      env: "API_PORT",
+      env: 'API_PORT',
     },
   },
 });
@@ -153,7 +152,7 @@ console.log(config.getConfig().api.port); // should be 3000
 By default all field are required, but you can make them optional as the following so even if the variable is undefined, the validation will be still valid
 
 ```typescript
-import donfig from "https://deno.land/x/donfig/mod.ts";
+import donfig from 'https://deno.land/x/donfig/mod.ts';
 
 const config = donfig({
   host: {
@@ -172,7 +171,7 @@ console.log(config.getConfig().host); // should be undefined
 Sometimes you need to init a config variable to null, then change it in runtime, it can be done like this
 
 ```typescript
-import donfig from "https://deno.land/x/donfig/mod.ts";
+import donfig from 'https://deno.land/x/donfig/mod.ts';
 
 const config = donfig({
   host: {
@@ -185,7 +184,7 @@ const config = donfig({
 config.validate(); // Should be valid
 console.log(config.getConfig().host); // should be null
 
-config.override({ host: "0.0.0.0" });
+config.override({ host: '0.0.0.0' });
 console.log(config.getConfig().host); // should be "0.0.0.0"
 ```
 

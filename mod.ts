@@ -1,2 +1,2 @@
-export { default as default } from "./main.ts";
-export type { ConfigSchema, ConfigFieldSchema } from "./types.ts";
+export { default as default } from './main.ts';
+export type { ConfigFieldSchema, ConfigSchema } from './types.ts';

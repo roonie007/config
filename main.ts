@@ -1,12 +1,6 @@
-import { Shape } from "https://deno.land/x/typed@v3.1.2/common.ts";
-import { deepmerge, typed } from "./deps.ts";
-import type {
-  ConfigFieldSchema,
-  ConfigSchema,
-  DeepPartial,
-  Overwrite,
-  TypedFunction,
-} from "./types.ts";
+import { Shape } from 'https://deno.land/x/typed@v3.1.2/common.ts';
+import { deepmerge, typed } from './deps.ts';
+import type { ConfigFieldSchema, ConfigSchema, DeepPartial, Overwrite, TypedFunction } from './types.ts';
 
 const getValue = ({
   type,
@@ -47,8 +41,8 @@ const getValue = ({
     if (type === Date) {
       return new Date(value as string);
     }
-    if (type === Array && typeof value === "string") {
-      return (value as string).split(",");
+    if (type === Array && typeof value === 'string') {
+      return (value as string).split(',');
     }
   }
 
@@ -57,7 +51,7 @@ const getValue = ({
 
 export const iterateOverSchema = ({
   object,
-  parentPath = "",
+  parentPath = '',
   fn,
 }: {
   object: Record<string, ConfigSchema | ConfigFieldSchema>;
@@ -65,7 +59,7 @@ export const iterateOverSchema = ({
   fn: (object: ConfigFieldSchema, path: string) => void;
 }) => {
   for (const key in object) {
-    const path = `${parentPath ? parentPath + "." : ""}${key}`;
+    const path = `${parentPath ? parentPath + '.' : ''}${key}`;
     if (object[key].type) {
       fn(object[key], path);
     } else {
@@ -80,7 +74,7 @@ export const iterateOverSchema = ({
 
 export const iterateOverSchemaData = (schema: Shape) => {
   for (const key in schema) {
-    if (typeof schema[key] === "object") {
+    if (typeof schema[key] === 'object') {
       schema[key] = iterateOverSchemaData(schema[key] as unknown as Shape);
     }
   }
@@ -102,7 +96,7 @@ export default <T = ConfigSchema>(schema: T) => {
     validationSchemaData = {};
     iterateOverSchema({
       object: schema as unknown as ConfigSchema,
-      parentPath: "",
+      parentPath: '',
       fn: (object, path) => {
         let toAccessObject: Record<string, unknown> = valueObject;
         let toAccessSchemaData = validationSchemaData;
@@ -129,7 +123,7 @@ export default <T = ConfigSchema>(schema: T) => {
             break;
         }
 
-        const keys = path.split(".");
+        const keys = path.split('.');
 
         for (const [i, key] of keys.entries()) {
           if (i === keys.length - 1) {
@@ -139,12 +133,12 @@ export default <T = ConfigSchema>(schema: T) => {
             toAccessSchemaData[key] = typedFunction;
             if (object.nullable) {
               toAccessSchemaData[key] = typed.nullable(
-                toAccessSchemaData[key] as TypedFunction
+                toAccessSchemaData[key] as TypedFunction,
               );
             }
             if (object.optional) {
               toAccessSchemaData[key] = typed.optional(
-                toAccessSchemaData[key] as TypedFunction
+                toAccessSchemaData[key] as TypedFunction,
               );
             }
           } else {
@@ -171,15 +165,15 @@ export default <T = ConfigSchema>(schema: T) => {
   const getConfig = () => deepmerge(valueObject, ...merges) as ConfigType;
   const getSchema = () =>
     iterateOverSchemaData(
-      validationSchemaData as unknown as Shape
+      validationSchemaData as unknown as Shape,
     ) as TypedFunction;
   const override = (config: DeepPartial<ConfigType>) => merges.push(config);
   const validate = () => {
     const result = getSchema()(getConfig());
     if (!result.ok) {
       const errors = result.errors
-        .map(({ message, path }) => `\n   ==> ${message} on ${path.join(".")}`)
-        .join("\n");
+        .map(({ message, path }) => `\n   ==> ${message} on ${path.join('.')}`)
+        .join('\n');
 
       throw new Error(errors);
     }

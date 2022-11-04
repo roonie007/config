@@ -1,4 +1,4 @@
-import type { typed } from "./deps.ts";
+import type { typed } from './deps.ts';
 
 interface CommonConfigFieldSchema {
   env?: string;
@@ -44,12 +44,10 @@ export interface ConfigSchema {
 
 type GetTypeFromConstructorString<T> = T extends typeof String ? string : never;
 type GetTypeFromConstructorNumber<T> = T extends typeof Number ? number : never;
-type GetTypeFromConstructorBoolean<T> = T extends typeof Boolean
-  ? boolean
+type GetTypeFromConstructorBoolean<T> = T extends typeof Boolean ? boolean
   : never;
 type GetTypeFromConstructorDate<T> = T extends typeof Date ? Date : never;
-type GetTypeFromConstructorArray<T> = T extends typeof Array
-  ? Array<unknown>
+type GetTypeFromConstructorArray<T> = T extends typeof Array ? Array<unknown>
   : never;
 
 type GTC<T> =
@@ -59,34 +57,28 @@ type GTC<T> =
   | GetTypeFromConstructorDate<T>
   | GetTypeFromConstructorArray<T>;
 
-type GetTypeFromConstructor<T, N, O> = GTC<T> & N extends true
-  ? O extends true
-    ? GTC<T> | null | undefined
-    : GTC<T> | null
-  : GTC<T> & O extends true
-  ? N extends true
-    ? GTC<T> | null | undefined
+type GetTypeFromConstructor<T, N, O> = GTC<T> & N extends true ? O extends true ? GTC<T> | null | undefined
+  : GTC<T> | null
+  : GTC<T> & O extends true ? N extends true ? GTC<T> | null | undefined
     : GTC<T> | undefined
   : GTC<T>;
 
 export type Overwrite<T> = {
-  [Property in keyof T]: T[Property] extends ConfigFieldSchema
-    ? GetTypeFromConstructor<
-        T[Property]["type"],
-        T[Property]["nullable"],
-        T[Property]["optional"]
-      >
+  [Property in keyof T]: T[Property] extends ConfigFieldSchema ? GetTypeFromConstructor<
+      T[Property]['type'],
+      T[Property]['nullable'],
+      T[Property]['optional']
+    >
     : Overwrite<T[Property]>;
 };
 
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Record<string, unknown>
-    ? DeepPartial<T[P]>
+  [P in keyof T]?: T[P] extends Record<string, unknown> ? DeepPartial<T[P]>
     : T[P];
 };
 
 export type TypedFunction = (
-  x: unknown
+  x: unknown,
 ) => typed.Result<
   string | number | boolean | Date | Array<unknown> | null | undefined
 >;
