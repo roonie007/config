@@ -1,5 +1,5 @@
 import { Shape } from "https://deno.land/x/typed@v3.1.2/common.ts";
-import { typed, deepmerge } from "./deps.ts";
+import { deepmerge, typed } from "./deps.ts";
 import type {
   ConfigFieldSchema,
   ConfigSchema,
@@ -92,83 +92,87 @@ export default <T = ConfigSchema>(schema: T) => {
   type ConfigType = Overwrite<T>;
   type PartialConfigType = DeepPartial<ConfigType>;
 
-  const valueObject: Record<string, unknown> = {};
+  let valueObject: Record<string, unknown> = {};
+  let validationSchemaData: Record<string, unknown | TypedFunction> = {};
+
   const merges: Array<PartialConfigType> = [];
 
-  const validationSchemaData: Record<string, unknown | TypedFunction> = {};
+  const loadValues = () => {
+    valueObject = {};
+    validationSchemaData = {};
+    iterateOverSchema({
+      object: schema as unknown as ConfigSchema,
+      parentPath: "",
+      fn: (object, path) => {
+        let toAccessObject: Record<string, unknown> = valueObject;
+        let toAccessSchemaData = validationSchemaData;
+        let typedFunction: TypedFunction = typed.string;
 
-  iterateOverSchema({
-    object: schema as unknown as ConfigSchema,
-    parentPath: "",
-    fn: (object, path) => {
-      let toAccessObject: Record<string, unknown> = valueObject;
-      let toAccessSchemaData = validationSchemaData;
-      let typedFunction: TypedFunction = typed.string;
+        switch (object.type) {
+          case String:
+            typedFunction = typed.string;
+            break;
+          case Number:
+            typedFunction = typed.number;
+            break;
 
-      switch (object.type) {
-        case String:
-          typedFunction = typed.string;
-          break;
-        case Number:
-          typedFunction = typed.number;
-          break;
+          case Boolean:
+            typedFunction = typed.boolean;
+            break;
 
-        case Boolean:
-          typedFunction = typed.boolean;
-          break;
+          case Array:
+            typedFunction = typed.array(typed.any);
+            break;
 
-        case Array:
-          typedFunction = typed.array(typed.any);
-          break;
+          case Date:
+            typedFunction = typed.date;
+            break;
+        }
 
-        case Date:
-          typedFunction = typed.date;
-          break;
-      }
+        const keys = path.split(".");
 
-      const keys = path.split(".");
-
-      for (const [i, key] of keys.entries()) {
-        if (i === keys.length - 1) {
-          toAccessObject[key] = getValue(object);
-
-          // Schema data
-          toAccessSchemaData[key] = typedFunction;
-          if (object.nullable) {
-            toAccessSchemaData[key] = typed.nullable(
-              toAccessSchemaData[key] as TypedFunction
-            );
-          }
-          if (object.optional) {
-            toAccessSchemaData[key] = typed.optional(
-              toAccessSchemaData[key] as TypedFunction
-            );
-          }
-        } else {
-          if (!toAccessObject[key]) {
-            toAccessObject[key] = {};
+        for (const [i, key] of keys.entries()) {
+          if (i === keys.length - 1) {
+            toAccessObject[key] = getValue(object);
 
             // Schema data
-            toAccessSchemaData[key] = {};
+            toAccessSchemaData[key] = typedFunction;
+            if (object.nullable) {
+              toAccessSchemaData[key] = typed.nullable(
+                toAccessSchemaData[key] as TypedFunction
+              );
+            }
+            if (object.optional) {
+              toAccessSchemaData[key] = typed.optional(
+                toAccessSchemaData[key] as TypedFunction
+              );
+            }
+          } else {
+            if (!toAccessObject[key]) {
+              toAccessObject[key] = {};
+
+              // Schema data
+              toAccessSchemaData[key] = {};
+            }
+
+            toAccessObject = toAccessObject[key] as Record<string, unknown>;
+            toAccessSchemaData = toAccessSchemaData[key] as Record<
+              string,
+              unknown
+            >;
           }
-
-          toAccessObject = toAccessObject[key] as Record<string, unknown>;
-          toAccessSchemaData = toAccessSchemaData[key] as Record<
-            string,
-            unknown
-          >;
         }
-      }
-    },
-  });
+      },
+    });
+  };
 
-  // Finalize schema
-  const validationSchema = iterateOverSchemaData(
-    validationSchemaData as unknown as Shape
-  ) as TypedFunction;
+  loadValues();
 
   const getConfig = () => deepmerge(valueObject, ...merges) as ConfigType;
-  const getSchema = () => validationSchema;
+  const getSchema = () =>
+    iterateOverSchemaData(
+      validationSchemaData as unknown as Shape
+    ) as TypedFunction;
   const override = (config: DeepPartial<ConfigType>) => merges.push(config);
   const validate = () => {
     const result = getSchema()(getConfig());
@@ -186,5 +190,6 @@ export default <T = ConfigSchema>(schema: T) => {
     getSchema,
     override,
     validate,
+    reloadValues: loadValues,
   };
 };

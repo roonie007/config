@@ -1,7 +1,6 @@
 import {
-  assertEquals,
-  assertThrows,
-  assertArrayIncludes,
+  assertArrayIncludes, assertEquals,
+  assertThrows
 } from "https://deno.land/std@0.134.0/testing/asserts.ts";
 import donfig from "./mod.ts";
 
@@ -58,6 +57,22 @@ Deno.test("Should validate the config with env variable", () => {
   const config = myConfig.getConfig();
 
   assertEquals(config.host, Deno.env.get("TEST_HOST"));
+  Deno.env.delete("TEST_HOST");
+});
+
+Deno.test("Should have the changed env value", () => {
+  Deno.env.set("TEST_HOST", "some-host");
+  
+  const myConfig = donfig(sampleConfigDataWithEnvVariable);
+
+  assertEquals(myConfig.getConfig().host, "some-host");
+
+  Deno.env.set("TEST_HOST", "another-host");
+  assertEquals(myConfig.getConfig().host, "some-host");
+
+  myConfig.reloadValues()
+  assertEquals(myConfig.getConfig().host, "another-host");
+
   Deno.env.delete("TEST_HOST");
 });
 
